@@ -165,10 +165,7 @@ export const getLikedVideos = asyncHandler(async (req, res) => {
             }
         },
         {
-            $project: {
-                _id: 0,
-                video: 1
-            }
+            $replaceRoot: { newRoot: "$likedVideos" }
         }
     ]);
 

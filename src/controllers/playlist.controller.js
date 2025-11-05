@@ -21,7 +21,7 @@ export const createPlaylist = asyncHandler(async (req, res) => {
     return res
         .status(201)
         .json(
-            new ApiResponse(200, playlist, "Playlist created successfully")
+            new ApiResponse(201, playlist, "Playlist created successfully")
         )
 
 })
@@ -226,7 +226,7 @@ export const addVideoToPlaylist = asyncHandler(async (req, res) => {
         throw new ApiError(403, "You are not allowed to modify this playlist");
     }
 
-    if (playlist.videos.includes(videoId)) {
+    if (playlist.videos.some(v => v.equals(videoId))) {
         throw new ApiError(400, "Video already exists in this playlist");
     }
 
@@ -262,9 +262,7 @@ export const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
     }
 
 
-    playlist.videos = playlist.videos.filter(
-        (vid) => vid.toString() !== videoId.toString()
-    );
+    playlist.videos.pull(videoId);
     await playlist.save();
 
     return res
@@ -283,16 +281,14 @@ export const deletePlaylist = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Invalid playlist ID");
     }
 
-    const playlist = await Playlist.findById(playlistId);
+    const playlist = await Playlist.findOneAndDelete({
+        _id: playlistId,
+        owner: userId
+    });
+
     if (!playlist) {
-        throw new ApiError(404, "Playlist not found");
+        throw new ApiError(404, "Playlist not found or unauthorized");
     }
-
-    if (playlist.owner.toString() !== userId.toString()) {
-        throw new ApiError(403, "You are not allowed to modify this playlist");
-    }
-
-    await Playlist.findByIdAndDelete(playlistId);
 
     return res
         .status(200)
@@ -312,8 +308,8 @@ export const updatePlaylist = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Invalid playlist ID");
     }
 
-    if (!name || !description) {
-        throw new ApiError(400,"All fields are required");
+    if (!name && !description) {
+        throw new ApiError(400, "At least one field is required");
     }
 
     const playlist = await Playlist.findById(playlistId);

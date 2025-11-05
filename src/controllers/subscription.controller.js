@@ -7,7 +7,7 @@ import ApiError from "../utils/ApiError.js";
 
 export const toggleSubscription = asyncHandler(async (req, res) => {
     const { channelId } = req.params;
-    const userId = req.user_id;
+    const userId = req.user._id;
 
     if (userId.toString() === channelId) {
         throw new ApiError(400, "You cannot subscribe to your own channel");
@@ -23,7 +23,7 @@ export const toggleSubscription = asyncHandler(async (req, res) => {
 
     if (existingSubscription) {
         // Unsubscribing if already subscribed
-        await Subscription.findByIdAndUpdate(existingSubscription._id,);
+        await Subscription.findByIdAndDelete(existingSubscription._id,);
         message = "Unsubscribed successfully";
     } else {
         // Subscribing
@@ -77,6 +77,11 @@ export const getUserChannelSubscribers = asyncHandler(async (req, res) => {
             $replaceRoot: {
                 newRoot: "$subscriberDetails"
             }
+        },
+        {
+            $sort: {
+                createdAt: -1
+            }
         }
     ]);
 
@@ -121,6 +126,11 @@ export const getSubscribedChannels = asyncHandler(async (req, res) => {
         {
             $replaceRoot: {
                 newRoot: "$subscribedToDetails"
+            }
+        },
+        {
+            $sort: {
+                createdAt: -1
             }
         }
     ]);
