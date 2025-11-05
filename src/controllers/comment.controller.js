@@ -8,6 +8,7 @@ import ApiError from "../utils/ApiError.js";
 export const getVideoComments = asyncHandler(async (req, res) => {
     const { videoId } = req.params;
     const { page = 1, limit = 10 } = req.query;
+    const videoObjectId = new mongoose.Types.ObjectId(videoId);
 
     const pageNum = parseInt(page, 10);
     const limitNum = parseInt(limit, 10);
@@ -15,7 +16,7 @@ export const getVideoComments = asyncHandler(async (req, res) => {
     const comments = await Comment.aggregate([
         {
             $match: {
-                video: new mongoose.Types.ObjectId(videoId)
+                video: videoObjectId
             }
         },
         {
@@ -55,7 +56,7 @@ export const getVideoComments = asyncHandler(async (req, res) => {
 
 
     const totalComments = await Comment.countDocuments({
-        video: videoId
+        video: videoObjectId
     });
 
 
