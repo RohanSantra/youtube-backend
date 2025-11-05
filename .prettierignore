@@ -1,0 +1,23 @@
+    # Node modules
+    node_modules/
+
+    # Build artifacts
+    build/
+    dist/
+    out/
+
+    # Log files
+    *.log
+
+    # Specific file types (e.g., images, videos)
+    *.png
+    *.jpg
+    *.gif
+    *.mp4
+
+    # Configuration files that Prettier might not handle well
+    .env
+    .env.*
+
+    # Specific directories or files to exclude
+    public/
